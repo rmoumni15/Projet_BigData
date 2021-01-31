@@ -1,0 +1,1 @@
+{"_jdstream": JavaObject id=o33, "_ssc": <pyspark.streaming.context.StreamingContext object at 0x7febdb29ead0>, "_sc": <SparkContext master=local[*] appName=PythonStreamingDirectKafkaWordCount>, "_jrdd_deserializer": AutoBatchedSerializer(PickleSerializer()), "is_cached": False, "is_checkpointed": False}
