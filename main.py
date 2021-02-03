@@ -1,10 +1,11 @@
+from asyncio import sleep
 
+from Api import get_movies_api
 from Scrapper import get_movies
-import nltk
 from tensorflow import keras
 import pickle
 from elasticsearch import Elasticsearch
-
+import tweepy.error as te
 
 if __name__ == '__main__':
     es = Elasticsearch()
@@ -18,8 +19,20 @@ if __name__ == '__main__':
     es.indices.create(index='movies-index', ignore=400)
 
     print('Index configured.....')
-
-
+    limitation = False
     while True:
-        test = get_movies('movies', utils_predics)
-        print(test)
+        if limitation is False:
+            try:
+                print("------------------------API---------------------")
+                movies_api = get_movies_api('movies', utils_predics)
+
+                print(movies_api)
+            except te.RateLimitError:
+                print('API Limit Exceeded Switching to Scrapper only.......')
+                limitation = True
+        print("------------------------Scrapper---------------------")
+        movies_scrapper = get_movies('movies', utils_predics)
+
+        print(movies_scrapper)
+
+        sleep(5)

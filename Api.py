@@ -20,9 +20,8 @@ api = tweepy.API(auth)
 
 
 def get_movies_api(topic, util_predics):
-
     def api_prop(m, topic, utils_predics):
-        #producer = KafkaProducer(bootstrap_servers='localhost:9092')
+        producer = KafkaProducer(bootstrap_servers='localhost:9092')
         b = ia.get_movie(str(m.getID()))
 
         title = b['title']
@@ -71,12 +70,10 @@ def get_movies_api(topic, util_predics):
 
         #### BETA ########
 
-        #producer.send(str(topic), bytes(movie.serialize(), encoding='utf-8'))
+        producer.send(str(topic), bytes(movie.serialize(), encoding='utf-8'))
         return movie
 
-
-    async def movies_apî(Topic = topic, utils_predics = util_predics):
-
+    async def movies_apî(Topic=topic, utils_predics=util_predics):
 
         top_100 = ia.get_popular100_movies()
         res = []
@@ -85,14 +82,13 @@ def get_movies_api(topic, util_predics):
             loop = asyncio.get_event_loop()
             tasks = [
                 loop.run_in_executor(executor, api_prop,
-                                     *(m, Topic, utils_predics ))
+                                     *(m, Topic, utils_predics))
                 for m in top_100
             ]
             for response in await asyncio.gather(*tasks):
                 if response != 'FAILED':
                     res.append(response.__dict__)
         return res
-
 
     start_time = time.time()
     loop = asyncio.get_event_loop()
@@ -104,14 +100,3 @@ def get_movies_api(topic, util_predics):
     print(f"====Execution Time : {(time.time() - start_time)} seconds====")
 
     return str(len(msg)) + " Movies from API"
-
-utils_predics = {
-        'model': keras.models.load_model('Model _Tokenizer/Model_GRU'),
-        'tokenizer': pickle.load(open("Model _Tokenizer/tokenizer.pickle", "rb")),
-        'max_row': pickle.load(open("Model _Tokenizer/max_row.pickle", "rb"))
-    }
-
-
-test = get_movies_api('movies', utils_predics)
-
-print(test)

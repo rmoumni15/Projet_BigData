@@ -71,14 +71,14 @@ def process_movie(topic, title_tag, rank, url_home, audiance_link, utils_predics
 
     movie_data = soup(movie_page, "lxml")
     movie_propreties = get_movie_propreties(movie_data)
-    #print(movie_link)
+
 
     score = movie_data.find("score-board", {"class": "scoreboard"})["audiencescore"]
     if score:
         score = int(score) * 1e-2
     else:
         score = 0
-    print(f"SCORE : {score}")
+
     genres = movie_propreties['Genre'] if 'Genre' in movie_propreties else 'unknown'
     original_language = movie_propreties['Original Language'] if 'Original Language' in movie_propreties else 'unknown'
     director = movie_propreties['Director'] if 'Director' in movie_propreties else 'unknown'
