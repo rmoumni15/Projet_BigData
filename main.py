@@ -1,21 +1,22 @@
 from asyncio import sleep
-
 from Api import get_movies_api
 from Scrapper import get_movies
-from tensorflow import keras
-import pickle
 from elasticsearch import Elasticsearch
 import tweepy.error as te
+from tensorflow import keras
+import pickle
 
-if __name__ == '__main__':
-    es = Elasticsearch()
-    utils_predics = {
+
+utils_predics = {
         'model': keras.models.load_model('Model _Tokenizer/Model_GRU'),
         'tokenizer': pickle.load(open("Model _Tokenizer/tokenizer.pickle", "rb")),
         'max_row': pickle.load(open("Model _Tokenizer/max_row.pickle", "rb"))
     }
-    print("Model Loaded.....")
+print("Model Loaded.....")
 
+
+if __name__ == '__main__':
+    es = Elasticsearch()
     es.indices.create(index='movies-index', ignore=400)
 
     print('Index configured.....')
@@ -30,9 +31,16 @@ if __name__ == '__main__':
             except te.RateLimitError:
                 print('API Limit Exceeded Switching to Scrapper only.......')
                 limitation = True
-        print("------------------------Scrapper---------------------")
-        movies_scrapper = get_movies('movies', utils_predics)
+            except:
+                print('unknown problem in api ....Skipping')
+                pass
+        try:
+            print("------------------------Scrapper---------------------")
+            movies_scrapper = get_movies('movies', utils_predics)
 
-        print(movies_scrapper)
+            print(movies_scrapper)
+        except:
+            print('unknown problem in Scrapper ....Skipping')
+            pass
 
         sleep(5)

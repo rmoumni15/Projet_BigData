@@ -3,11 +3,12 @@ import json
 from pyspark import SparkContext, SparkConf
 from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
-from movie import *
+from movie import Movie, clean_movie
 
 es_write_conf = {"es.nodes": 'localhost',
                  "es.port": '9200',
-                 "es.resource": 'movies-index/movie'
+                 "es.resource": 'movies-index/movie',
+                 "es.nodes.wan.only": "true"
                  }
 
 conf = SparkConf().setAppName("PythonStreamingDirectKafkaWordCount") \
@@ -15,7 +16,7 @@ conf = SparkConf().setAppName("PythonStreamingDirectKafkaWordCount") \
     .set("es.index.auto.create", "true")
 
 sc = SparkContext(appName="PythonStreamingDirectKafkaWordCount", conf=conf)
-sc.addPyFile("/home/rida/Projet_BigData/Spark/movie.py")
+sc.addPyFile("./Spark/movie.py")
 ssc = StreamingContext(sc, 5)
 # brokers, topic = sys.argv[1:]
 kvs = KafkaUtils.createDirectStream(ssc, ["movies"], {"metadata.broker.list": "localhost:9092"})

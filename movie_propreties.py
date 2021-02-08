@@ -1,13 +1,11 @@
 from urllib.error import HTTPError
-
 from kafka import KafkaProducer
-from keras_preprocessing.sequence import pad_sequences
 from tqdm import tqdm
 from urllib.request import urlopen as uReq
 from bs4 import BeautifulSoup as soup
-import numpy as np
 from Clean_Text.Clean_Text import CleanText
 from Spark.movie import Movie
+from predict import predict_score
 
 cleaner = CleanText()
 
@@ -72,7 +70,6 @@ def process_movie(topic, title_tag, rank, url_home, audiance_link, utils_predics
     movie_data = soup(movie_page, "lxml")
     movie_propreties = get_movie_propreties(movie_data)
 
-
     score = movie_data.find("score-board", {"class": "scoreboard"})["audiencescore"]
     if score:
         score = int(score) * 1e-2
@@ -114,19 +111,6 @@ def process_movie(topic, title_tag, rank, url_home, audiance_link, utils_predics
                   director=director, writer=writer, date_theatre=date_theatre, date_streaming=date_streaming,
                   box_office=box_office, duree=duree)
 
-    ##### BETA #######
-
-    if len(movie.reviews) > 0:
-        seq_reviews = pad_sequences(utils_predics['tokenizer'].texts_to_sequences(movie.reviews), utils_predics['max_row']
-                                    , padding='post')
-        seq_reviews = utils_predics['model'].predict(seq_reviews)
-        pred = [(np.argmax(x) + 1) / 5 for x in seq_reviews]
-
-        movie.reviews = np.round(np.mean(pred), 2)
-    else:
-        movie.reviews = 0
-
-    #### BETA ########
-
+    movie = predict_score(movie, utils_predics)
     producer.send(str(topic), bytes(movie.serialize(), encoding='utf-8'))
     return movie

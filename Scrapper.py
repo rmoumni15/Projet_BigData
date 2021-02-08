@@ -26,7 +26,7 @@ def get_movies(TOPIC_NAME, utils_predics):
         admin_client.create_topics(new_topics=topic, validate_only=False)
     """
 
-    async def Scrapper(topic_=TOPIC_NAME) -> list:
+    async def Scrapper(topic_=TOPIC_NAME, utils_predics= utils_predics) -> list:
         url_top = "https://www.rottentomatoes.com/top/bestofrt/?year=2020"
         url_home = "https://www.rottentomatoes.com"
         audiance_link = "/reviews?type=user"

@@ -1,6 +1,5 @@
 
 import datetime
-import numpy as np
 
 class Movie:
 
@@ -71,30 +70,7 @@ def clean_movie(movie: Movie):
         return movie
 
 
-def send_es(obj):
-    es_write_conf = {
 
-        # specify the node that we are sending data to (this should be the master)
-        "es.nodes": 'localhost',
 
-        # specify the port in case it is not the default port
-        "es.port": '9200',
 
-        # specify a resource in the form 'index/doc-type'
-        "es.resource": 'test-index/movie'
-    }
-    try:
-        obj.saveAsNewAPIHadoopFile(
-            path='-',
-            outputFormatClass="org.elasticsearch.hadoop.mr.EsOutputFormat",
-            keyClass="org.apache.hadoop.io.NullWritable",
-            valueClass="org.elasticsearch.hadoop.mr.LinkedMapWritable",
-
-            # critically, we must specify our `es_write_conf`
-            conf=es_write_conf)
-        print('#############DATA SENT###################')
-
-    except:
-        print('################FAIL###############')
-        return obj
 

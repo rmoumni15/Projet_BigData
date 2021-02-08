@@ -11,6 +11,7 @@ import pickle
 import numpy as np
 
 from Spark.movie import Movie
+from predict import predict_score
 from movie_propreties import clean_df_column
 
 ia = IMDb()
@@ -19,7 +20,7 @@ auth = tweepy.OAuthHandler('SCxux1ZWeeT6MiTZQUfoZ6KSw', 'cg4BjefvlUHHKyVn77EsNrm
 api = tweepy.API(auth)
 
 
-def get_movies_api(topic, util_predics):
+def get_movies_api(topic, utils_predics):
     def api_prop(m, topic, utils_predics):
         producer = KafkaProducer(bootstrap_servers='localhost:9092')
         b = ia.get_movie(str(m.getID()))
@@ -55,25 +56,11 @@ def get_movies_api(topic, util_predics):
         movie = Movie(name=title, rank=rank, genres=genres, score=score,
                       reviews=reviews, langage=langage, director=director, writer=writer, date_theatre=date_theatre,
                       date_streaming=date_streaming, box_office=box_office, duree=duree)
-        ##### BETA #######
-
-        if len(movie.reviews) > 0:
-            seq_reviews = pad_sequences(utils_predics['tokenizer'].texts_to_sequences(movie.reviews),
-                                        utils_predics['max_row']
-                                        , padding='post')
-            seq_reviews = utils_predics['model'].predict(seq_reviews)
-            pred = [(np.argmax(x) + 1) / 5 for x in seq_reviews]
-
-            movie.reviews = np.round(np.mean(pred), 2)
-        else:
-            movie.reviews = 0
-
-        #### BETA ########
-
+        movie = predict_score(movie, utils_predics)
         producer.send(str(topic), bytes(movie.serialize(), encoding='utf-8'))
         return movie
 
-    async def movies_apî(Topic=topic, utils_predics=util_predics):
+    async def movies_apî(Topic=topic , utils_predics= utils_predics):
 
         top_100 = ia.get_popular100_movies()
         res = []
@@ -94,9 +81,6 @@ def get_movies_api(topic, util_predics):
     loop = asyncio.get_event_loop()
     future = asyncio.ensure_future(movies_apî())
     msg = loop.run_until_complete(future)
-
-    # producer.send(str(TOPIC_NAME), json.dumps(msg).encode('utf-8'))
-
     print(f"====Execution Time : {(time.time() - start_time)} seconds====")
 
     return str(len(msg)) + " Movies from API"
