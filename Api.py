@@ -5,17 +5,16 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from imdb import IMDb
 import tweepy
 from kafka import KafkaProducer
-from keras_preprocessing.sequence import pad_sequences
-from tensorflow import keras
-import pickle
-import numpy as np
+
 
 from Spark.movie import Movie
 from predict import predict_score
 from movie_propreties import clean_df_column
 
 ia = IMDb()
-auth = tweepy.OAuthHandler('SCxux1ZWeeT6MiTZQUfoZ6KSw', 'cg4BjefvlUHHKyVn77EsNrmk8xVLqlGoaMErtLmxFC1AOViYXf')
+CONSUMMER_KEY = "###########"
+CONSUMMER_SECRET = "##############################"
+auth = tweepy.OAuthHandler(CONSUMMER_KEY, CONSUMMER_SECRET)
 
 api = tweepy.API(auth)
 
@@ -45,14 +44,12 @@ def get_movies_api(topic, utils_predics):
             duree = 0
 
         reviews = []
-
         tweet = api.search('#' + title.strip().lower().replace(" ", ""), tweet_mode="extended", count=50,
                            exclude_replies=True)
         for t in tweet:
             reviews.append(t.full_text)
 
         reviews = list(clean_df_column(reviews))
-
         movie = Movie(name=title, rank=rank, genres=genres, score=score,
                       reviews=reviews, langage=langage, director=director, writer=writer, date_theatre=date_theatre,
                       date_streaming=date_streaming, box_office=box_office, duree=duree)

@@ -1,0 +1,16 @@
+echo STEP 1/4 : create python3.7 environnement...
+virtualenv -p python3.7 BigData_RK2
+source BigData_RK2/bin/activate
+
+echo  STEP 2/4 : install requirements....
+pip install -r requirements.txt
+sleep 5
+echo Done....
+
+echo STEP 3/4 : executing main.....
+nohup python main.py &
+
+sleep 10
+
+echo  STEP 4/4 : Launching spark......
+spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.2.3,org.apache.spark:spark-sql-kafka-0-10_2.11:2.2.3,org.elasticsearch:elasticsearch-hadoop:7.10.0 Spark/SparkStream.py
