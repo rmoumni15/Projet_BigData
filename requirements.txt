@@ -7,6 +7,6 @@ tensorflow==2.4.1
 elasticsearch==7.10.1
 nltk==3.5
 h5py==2.10.0
-lxml==4.6.2
+lxml==4.6.3
 IMDbPY
 kafka-python==2.0.2
